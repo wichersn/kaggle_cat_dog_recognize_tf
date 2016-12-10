@@ -2,11 +2,11 @@ import tensorflow as tf
 
 def model(x):
 
-    conv1 = tf.contrib.layers.convolution2d(x, 10, [6,6], [4,4], "VALID",
+    conv1 = tf.contrib.layers.convolution2d(x, 10, [10,10], [4,4], "VALID",
                                             weights_initializer=tf.truncated_normal_initializer(stddev=0.1),
                                             activation_fn=tf.nn.relu)
-    # conv1 = tf.nn.max_pool(conv1, [1, 2, 2, 1], [1, 2, 2, 1], 'VALID')
-    # print(conv1)
+    conv1 = tf.nn.max_pool(conv1, [1, 2, 2, 1], [1, 2, 2, 1], 'VALID')
+    print(conv1)
 
     # last_conv = tf.contrib.layers.convolution2d(conv1, 5, [4,4], [2,2], "VALID", activation_fn=tf.nn.relu)
     # last_conv = tf.nn.max_pool(last_conv, [1, 2, 2, 1], [1, 2, 2, 1], 'VALID')
@@ -34,6 +34,7 @@ def get_error(y, y_):
     pred = tf.argmax(y, 1)
     return 1 - tf.reduce_mean(tf.to_float(tf.equal(pred, tf.argmax(y_, 1))))
 
-def get_summary_op(x):
-    tf.image_summary("images", x, max_images=10)
+def get_summary_op(x, loss):
+    tf.image_summary("images", x, max_images=3)
+    tf.summary.scalar("loss", loss)
     return tf.summary.merge_all()

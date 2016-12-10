@@ -24,9 +24,9 @@ def read_imgs_opp(input_queue):
     image = tf.image.decode_jpeg(image_file, channels=3)
     return image, label
 
-def input_pipeline(filenames, labels, batch_size, num_epochs=None):
+def input_pipeline(filenames, labels, batch_size):
     filename_queue = tf.train.slice_input_producer(
-      [filenames, labels], num_epochs=num_epochs, shuffle=True)
+      [filenames, labels], shuffle=True)
     example, label = read_imgs_opp(filename_queue)
     # min_after_dequeue defines how big a buffer we will randomly sample
     #   from -- bigger means better shuffling but slower start up and more

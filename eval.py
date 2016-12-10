@@ -2,10 +2,9 @@ import tensorflow as tf
 import input
 import model
 
-filenames, labels = input.get_filenames_labels(12500, .8, True, "../train_processed")
+filenames, labels = input.get_filenames_labels(12500, .8, False, "../train_processed")
 
 x, y_ = input.input_pipeline(filenames, labels, 20)
-
 
 sess = tf.Session()
 
@@ -16,29 +15,24 @@ logs_path = "../logs"
 summary_writer = tf.train.SummaryWriter(logs_path, graph=tf.get_default_graph())
 
 y = model.model(x)
-loss = model.get_loss(y, y_)
-optimizer =model.get_optimizer(loss)
-
-merged_summary_op = model.get_summary_op(x, loss)
+error = model.get_error(y, y_)
 
 saver = tf.train.Saver()
 
-saver.restore(sess, "../saved_models/model.ckpt")
-
 sess.run(tf.global_variables_initializer())
 
+saver.restore(sess, "../saved_models/model.ckpt")
+
+batch_size = 1
+num_iters = 10 #len(filenames) / batch_size
+
 i = 0
+total_error = 0
 try:
-    while not coord.should_stop() and i < 100000:
-        _, summary = sess.run([optimizer, merged_summary_op])
+    while not coord.should_stop() and i < 10:
+        error_val = sess.run(error)
+        total_error += error_val
         # print(x.eval(session=sess))
-
-        if i % 1000 == 0:
-            summary_writer.add_summary(summary, i)
-
-        if i % 10000 == 0:
-            save_path = saver.save(sess, "../saved_models/model.ckpt")
-
         i += 1
 
 except tf.errors.OutOfRangeError:
@@ -49,3 +43,5 @@ finally:
 coord.join(threads)
 
 sess.close()
+
+print("Average error", total_error/float(num_iters))
