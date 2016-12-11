@@ -6,13 +6,12 @@ import time
 filenames, labels = input.get_filenames_labels(12500, .95, False, "../train")
 
 batch_size = 10
-x, y_ = input.input_pipeline(filenames, labels, batch_size, shuffle=False)
+x, y_ = input.input_pipeline(filenames, labels, batch_size, isTrain=False)
 
 sess = tf.Session()
 
 coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
 
 y = model.model(x)
 error = model.get_error(y, y_)

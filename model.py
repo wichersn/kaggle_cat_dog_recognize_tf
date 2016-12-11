@@ -7,14 +7,14 @@ def model(x):
                                             activation_fn=tf.nn.relu)
     conv1 = tf.nn.max_pool(conv1, [1, 4, 4, 1], [1, 2, 2, 1], 'VALID')
     conv1 = tf.nn.lrn(conv1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name='norm1')
-    print(conv1)
+    #print(conv1)
 
     last_conv = tf.contrib.layers.convolution2d(conv1, 32, [5,5], [1,1], "VALID",
                                                 weights_initializer=tf.truncated_normal_initializer(stddev=0.1),
                                                 activation_fn=tf.nn.relu)
     last_conv = tf.nn.max_pool(last_conv, [1, 3, 3, 1], [1, 2, 2, 1], 'VALID')
     last_conv = tf.nn.lrn(last_conv, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name='norm2')
-    print(last_conv)
+    #print(last_conv)
 
     shape = last_conv.get_shape().as_list()
     reshaped_last_conv = tf.reshape(last_conv, [-1, shape[1] * shape[2] * shape[3]])
