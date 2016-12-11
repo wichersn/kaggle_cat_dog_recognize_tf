@@ -1,47 +1,64 @@
 import tensorflow as tf
 import input
 import model
+import time
 
-filenames, labels = input.get_filenames_labels(12500, .8, False, "../train_processed")
+filenames, labels = input.get_filenames_labels(12500, .95, False, "../train")
 
-x, y_ = input.input_pipeline(filenames, labels, 20)
+batch_size = 10
+x, y_ = input.input_pipeline(filenames, labels, batch_size, shuffle=False)
 
 sess = tf.Session()
 
 coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-logs_path = "../logs"
-summary_writer = tf.train.SummaryWriter(logs_path, graph=tf.get_default_graph())
 
 y = model.model(x)
 error = model.get_error(y, y_)
 
-saver = tf.train.Saver()
+merged_summary_op = model.get_summary_op(x, None, error)
+
+logs_path = "../eval_logs"
+summary_writer = tf.train.SummaryWriter(logs_path, graph=tf.get_default_graph())
 
 sess.run(tf.global_variables_initializer())
 
-saver.restore(sess, "../saved_models/model.ckpt")
+run_num = 0
+while True:
+    print("start calc")
+    saver = tf.train.Saver()
+    try:
+        saver.restore(sess, "../saved_models/model.ckpt")
+    except:
+        pass
+    else:
 
-batch_size = 1
-num_iters = 10 #len(filenames) / batch_size
+        num_iters = int(len(filenames) / batch_size)
 
-i = 0
-total_error = 0
-try:
-    while not coord.should_stop() and i < 10:
-        error_val = sess.run(error)
-        total_error += error_val
-        # print(x.eval(session=sess))
-        i += 1
+        i = 0
+        total_error = 0
+        while not coord.should_stop() and i < num_iters:
+            error_val = sess.run(error)
+            total_error += error_val
+            i += 1
 
-except tf.errors.OutOfRangeError:
-    print("Done")
-finally:
-    coord.request_stop()
+
+        average_error = total_error/float(num_iters)
+
+        summary = tf.Summary()
+        summary.ParseFromString(sess.run(merged_summary_op))
+        summary.value.add(tag='Average Error', simple_value=average_error)
+        summary_writer.add_summary(summary, run_num)
+
+        print("average error", average_error)
+
+    run_num += 1
+
+    time.sleep(120)
+
+coord.request_stop()
 
 coord.join(threads)
 
 sess.close()
-
-print("Average error", total_error/float(num_iters))
