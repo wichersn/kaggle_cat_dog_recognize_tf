@@ -5,6 +5,8 @@ import time
 
 filenames, labels = input.get_filenames_labels(12500, .95, False, "../train")
 
+print("num_examples", len(filenames))
+
 batch_size = 10
 x, y_ = input.input_pipeline(filenames, labels, batch_size, isTrain=False)
 
@@ -13,7 +15,7 @@ sess = tf.Session()
 coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-y = model.model(x)
+y = model.model(x, False)
 error = model.get_error(y, y_)
 
 merged_summary_op = model.get_summary_op(x, None, error)
@@ -54,7 +56,7 @@ while True:
 
     run_num += 1
 
-    time.sleep(120)
+    time.sleep(60)
 
 coord.request_stop()
 

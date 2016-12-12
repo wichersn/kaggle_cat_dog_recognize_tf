@@ -3,6 +3,8 @@ import input
 import model
 import time
 
+#tf.set_random_seed(68406)
+
 filenames, labels = input.get_filenames_labels(12500, .95, True, "../train")
 
 x, y_ = input.input_pipeline(filenames, labels, 50)
@@ -13,7 +15,7 @@ sess = tf.Session()
 coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-y = model.model(x)
+y = model.model(x, True)
 loss = model.get_loss(y, y_)
 error = model.get_error(y, y_)
 optimizer =model.get_optimizer(loss)
@@ -40,13 +42,15 @@ try:
         # print(x.eval(session=sess))
 
         if time.time() >= last_summary_time + 30:
+        #if i % 250 == 0:
             summary = sess.run(merged_summary_op)
 
             summary_writer.add_summary(summary, i)
             last_summary_time = time.time()
             print("summary", i)
 
-        if time.time() >= last_save_time + 120:
+        if time.time() >= last_save_time + 60:
+        #if i % 250 == 0:
             save_path = saver.save(sess, "../saved_models/model.ckpt")
             last_save_time = time.time()
             print("saved", i)

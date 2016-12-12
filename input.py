@@ -40,13 +40,13 @@ def input_pipeline(filenames, labels, batch_size, isTrain=True):
 
     min_after_dequeue = 100
     capacity = min_after_dequeue + 2 * batch_size
-    if isTrain:
-        example_batch, label_batch = tf.train.shuffle_batch(
-          [example, label], batch_size=batch_size, capacity=capacity,
-          min_after_dequeue=min_after_dequeue)
-    else:
-        example_batch, label_batch = tf.train.batch(
-            [example, label], batch_size=batch_size, capacity=capacity)
+    # if isTrain:
+    #     example_batch, label_batch = tf.train.shuffle_batch(
+    #       [example, label], batch_size=batch_size, capacity=capacity,
+    #       min_after_dequeue=min_after_dequeue)
+    # else:
+    example_batch, label_batch = tf.train.batch(
+        [example, label], batch_size=batch_size, capacity=capacity)
     example_batch = tf.cast(example_batch, tf.float32)
     #example_batch = tf.image.resize_images(example_batch, [32, 32])
     return example_batch, label_batch
