@@ -35,7 +35,7 @@ summary_writer = tf.train.SummaryWriter(logs_path, graph=tf.get_default_graph())
 
 i = 0
 last_summary_time = 0
-last_save_time = time.time()
+last_save_time = 0 #time.time()
 try:
     while not coord.should_stop() and i < 100000:
         sess.run(optimizer)

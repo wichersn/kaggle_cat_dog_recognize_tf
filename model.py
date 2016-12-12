@@ -21,14 +21,15 @@ def model(x, isTrain):
     shape = last_conv.get_shape().as_list()
     reshaped_last_conv = tf.reshape(last_conv, [-1, shape[1] * shape[2] * shape[3]])
 
-    w = tf.get_variable('weights', shape=(shape[1] * shape[2] * shape[3], 2), dtype=tf.float32,
-        initializer=tf.contrib.layers.xavier_initializer())
-    #w = tf.Variable(tf.zeros((shape[1] * shape[2] * shape[3], 2), dtype=tf.float32))
-    b = tf.Variable(tf.zeros(2, dtype=tf.float32))
-    y = tf.matmul(reshaped_last_conv, w) + b
+    print(reshaped_last_conv)
 
-    #y = tf.contrib.layers.fully_connected(reshaped_last_conv, 2,
-    #                                     weights_initializer=tf.truncated_normal_initializer(stddev=0.1))
+    fully_connect = tf.contrib.layers.fully_connected(reshaped_last_conv, 100,
+                                                     weights_initializer=tf.contrib.layers.xavier_initializer())
+
+    y = tf.contrib.layers.fully_connected(fully_connect, 2,
+                                          biases_initializer=tf.constant_initializer(0.0),
+                                          weights_initializer=tf.contrib.layers.xavier_initializer(),
+                                          activation_fn=None)
 
     return y
 
