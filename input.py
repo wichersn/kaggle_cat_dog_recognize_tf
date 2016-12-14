@@ -36,7 +36,7 @@ def input_pipeline(filenames, labels, batch_size, isTrain=True):
     #   min_after_dequeue + (num_threads + a small safety margin) * batch_size
 
 
-    example = transform_example(example, isTrain)
+    example = transform_example(example, label, isTrain)
 
     min_after_dequeue = 100
     capacity = min_after_dequeue + 2 * batch_size
@@ -51,11 +51,16 @@ def input_pipeline(filenames, labels, batch_size, isTrain=True):
     #example_batch = tf.image.resize_images(example_batch, [32, 32])
     return example_batch, label_batch
 
-def transform_example(example, isTrain):
+def transform_example(example, label, isTrain):
     example = tf.image.resize_images(example, [50, 50])  # tf.reshape(example, [100, 100, 3])
     if isTrain:
         example = tf.image.random_flip_left_right(example)
         example = tf.image.random_brightness(example, .7)
         example = tf.image.random_contrast(example, .4, 1.6)
     example = tf.image.per_image_standardization(example)
+    if isTrain:
+        noise = tf.truncated_normal(example.get_shape(), stddev=.1)
+        example = example + noise
+
+
     return example
