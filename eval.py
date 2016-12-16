@@ -15,7 +15,9 @@ sess = tf.Session()
 coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-y = model.model(x, False)
+with tf.variable_scope("model") as scope:
+    y = model.model(x, False)
+
 error = model.get_error(y, y_)
 
 merged_summary_op = model.get_summary_op(x, None, error)

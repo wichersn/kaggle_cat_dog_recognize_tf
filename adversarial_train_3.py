@@ -5,7 +5,7 @@ import time
 
 filenames, labels = input.get_filenames_labels(12500, .95, True, "../train")
 
-x, y_ = input.input_pipeline(filenames, labels, 50)
+images, y_ = input.input_pipeline(filenames, labels, 50)
 
 
 sess = tf.Session()
@@ -13,12 +13,35 @@ sess = tf.Session()
 coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-y = model.model(x, True)
+
+
+
+with tf.variable_scope("model") as scope:
+    adver_y = model.model(images, False)
+
+shifted_y_ = tf.concat(1, [tf.slice(y_, [0,1], [-1,1]), tf.slice(y_, [0,0], [-1,1])])
+adver_loss = model.get_loss(adver_y, shifted_y_)
+
+grad = tf.gradients(adver_loss, images)[0]
+
+x = tf.Variable(images, trainable=False)
+x = x.assign(images - grad*1000)
+
+
+with tf.variable_scope("model") as scope:
+    scope.reuse_variables()
+    y = model.model(x, True)
+
 loss = model.get_loss(y, y_)
 error = model.get_error(y, y_)
 optimizer =model.get_optimizer(loss)
 
-merged_summary_op = model.get_summary_op(x, loss, error)
+tf.image_summary("images", images, max_images=10)
+tf.image_summary("x", x, max_images=10)
+tf.image_summary("grad", grad, max_images=10)
+tf.summary.scalar("loss", loss)
+tf.summary.scalar("error", error)
+merged_summary_op = tf.summary.merge_all()
 
 sess.run(tf.global_variables_initializer())
 
@@ -36,7 +59,7 @@ last_summary_time = 0
 last_save_time = 0 #time.time()
 try:
     while not coord.should_stop() and i < 100000:
-        sess.run(optimizer)
+        sess.run([optimizer, grad])
         # print(x.eval(session=sess))
 
         if time.time() >= last_summary_time + 30:
