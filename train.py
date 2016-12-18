@@ -3,35 +3,37 @@ import input
 import model
 import time
 
-filenames, labels = input.get_filenames_labels(12500, .95, True, "../train")
-
-x, y_ = input.input_pipeline(filenames, labels, 70)
-
-
 sess = tf.Session()
 
-coord = tf.train.Coordinator()
-threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+with tf.variable_scope("input"):
+    filenames, labels = input.get_filenames_labels(12500, .95, True, "../train")
+    x, y_ = input.input_pipeline(filenames, labels, 70)
+
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
 with tf.variable_scope("model") as scope:
     y = model.model(x, True)
 
-loss = model.get_loss(y, y_)
-error = model.get_error(y, y_)
-optimizer =model.get_optimizer(loss)
+with tf.variable_scope("optimizer"):
+    loss = model.get_loss(y, y_)
+    optimizer =model.get_optimizer(loss)
 
-merged_summary_op = model.get_summary_op(x, loss, error)
+error = model.get_error(y, y_)
 
 sess.run(tf.global_variables_initializer())
 
-saver = tf.train.Saver()
-try:
-    saver.restore(sess, "../saved_models/model.ckpt")
-except tf.errors.NotFoundError:
-    print("No previous model")
+with tf.variable_scope("saver"):
+    saver = tf.train.Saver()
+    try:
+        saver.restore(sess, "../saved_models/model.ckpt")
+    except tf.errors.NotFoundError:
+        print("No previous model")
 
-logs_path = "../logs"
-summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
+with tf.variable_scope("summary"):
+    logs_path = "../logs"
+    merged_summary_op = model.get_summary_op(x, loss, error)
+    summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 
 i = 0
 last_summary_time = 0
