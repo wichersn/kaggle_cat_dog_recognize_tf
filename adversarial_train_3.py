@@ -5,15 +5,14 @@ import time
 
 filenames, labels = input.get_filenames_labels(12500, .95, True, "../train")
 
-images, y_ = input.input_pipeline(filenames, labels, 50)
+batch_size = 70
+images, y_ = input.input_pipeline(filenames, labels, batch_size)
 
 
 sess = tf.Session()
 
 coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
-
 
 
 with tf.variable_scope("model") as scope:
@@ -24,8 +23,23 @@ adver_loss = model.get_loss(adver_y, shifted_y_)
 
 grad = tf.gradients(adver_loss, images)[0]
 
+#scale_grad = tf.abs(tf.truncated_normal(shape=grad.get_shape(), stddev=.01))
+update_prob = .5
+update_mag = .01
+scale_grad = tf.to_float(tf.random_uniform(shape=[batch_size]) > update_prob) * update_mag
+grad_shape = grad.get_shape().as_list()
+scale_grad = tf.tile(scale_grad, [grad_shape[1] * grad_shape[2] * grad_shape[3]])
+scale_grad = tf.reshape(scale_grad, grad_shape[1:4] + [batch_size])
+scale_grad = tf.transpose(scale_grad, [3, 0, 1, 2])
+update = -tf.mul(tf.sign(grad), scale_grad)
+
+new_x = images + update
+#new_x = tf.map_fn(lambda img: tf.image.random_flip_left_right(img), new_x)
+
 x = tf.Variable(images, trainable=False)
-x = x.assign(images - grad*1000)
+x = x.assign(new_x)
+print("x", x)
+print("x", x)
 
 
 with tf.variable_scope("model") as scope:
@@ -36,23 +50,24 @@ loss = model.get_loss(y, y_)
 error = model.get_error(y, y_)
 optimizer =model.get_optimizer(loss)
 
-tf.image_summary("images", images, max_images=10)
-tf.image_summary("x", x, max_images=10)
-tf.image_summary("grad", grad, max_images=10)
+tf.summary.image("images", images, max_outputs=20)
+tf.summary.image("x", x, max_outputs=20)
+tf.summary.image("update", update, max_outputs=20)
+tf.summary.image("scale_grad", scale_grad, max_outputs=20)
 tf.summary.scalar("loss", loss)
 tf.summary.scalar("error", error)
 merged_summary_op = tf.summary.merge_all()
 
 sess.run(tf.global_variables_initializer())
 
-saver = tf.train.Saver()
+saver = tf.train.Saver(var_list=tf.get_collection(tf.GraphKeys.MODEL_VARIABLES))
 try:
     saver.restore(sess, "../saved_models/model.ckpt")
 except tf.errors.NotFoundError:
     print("No previous model")
 
 logs_path = "../logs"
-summary_writer = tf.train.SummaryWriter(logs_path, graph=tf.get_default_graph())
+summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 
 i = 0
 last_summary_time = 0

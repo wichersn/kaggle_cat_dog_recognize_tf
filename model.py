@@ -3,24 +3,37 @@ import tensorflow as tf
 def model(x, isTrain):
 
     with tf.variable_scope("conv1"):
-        conv1 = tf.contrib.layers.convolution2d(x, 8, [6, 6], [1,1], "VALID",
+        oneOneConv1 = tf.contrib.layers.convolution2d(x, 3, [1, 1], [1, 1], "VALID",
                                                 weights_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
                                                 biases_initializer=tf.constant_initializer(0.0),
-                                                activation_fn=tf.nn.relu,
-                                                #trainable=isTrain
+                                                activation_fn=tf.nn.relu
+                                                )
+        conv1 = tf.contrib.layers.convolution2d(oneOneConv1, 8, [6, 6], [1,1], "VALID",
+                                                weights_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
+                                                biases_initializer=tf.constant_initializer(0.0),
+                                                activation_fn=tf.nn.relu
                                                 )
         conv1 = tf.nn.max_pool(conv1, [1, 4, 4, 1], [1, 2, 2, 1], 'VALID')
+        if isTrain:
+            conv1 = tf.nn.dropout(conv1, .7)
         conv1 = tf.nn.lrn(conv1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name='norm1')
     print(conv1)
 
     with tf.variable_scope("conv2"):
-        last_conv = tf.contrib.layers.convolution2d(conv1, 16, [5,5], [1,1], "VALID",
+        oneOneConv2 = tf.contrib.layers.convolution2d(conv1, 8, [1, 1], [1, 1], "VALID",
+                                                weights_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
+                                                biases_initializer=tf.constant_initializer(0.0),
+                                                activation_fn=tf.nn.relu
+                                                )
+        last_conv = tf.contrib.layers.convolution2d(oneOneConv2, 16, [5,5], [1,1], "VALID",
                                                     weights_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
                                                     biases_initializer=tf.constant_initializer(0.0),
                                                     activation_fn=tf.nn.relu,
                                                     #trainable=isTrain
                                                     )
         last_conv = tf.nn.max_pool(last_conv, [1, 3, 3, 1], [1, 2, 2, 1], 'VALID')
+        if isTrain:
+            last_conv = tf.nn.dropout(last_conv, .7)
         last_conv = tf.nn.lrn(last_conv, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name='norm2')
     print(last_conv)
 
@@ -31,9 +44,13 @@ def model(x, isTrain):
 
     with tf.variable_scope("fully_connect"):
         fully_connect = tf.contrib.layers.fully_connected(reshaped_last_conv, 100,
+                                                          biases_initializer=tf.constant_initializer(0.0),
                                                           weights_initializer=tf.contrib.layers.xavier_initializer(),
                                                           #trainable=isTrain
                                                           )
+        if isTrain:
+            fully_connect = tf.nn.dropout(fully_connect, .7)
+
     with tf.variable_scope("output"):
         y = tf.contrib.layers.fully_connected(fully_connect, 2,
                                               biases_initializer=tf.constant_initializer(0.0),
@@ -55,7 +72,7 @@ def get_error(y, y_):
     return 1 - tf.reduce_mean(tf.to_float(tf.equal(pred, tf.argmax(y_, 1))))
 
 def get_summary_op(x, loss, error):
-    tf.image_summary("images", x, max_images=10)
+    tf.summary.image("images", x, max_outputs=10)
     if not loss == None:
         tf.summary.scalar("loss", loss)
     if not error == None:

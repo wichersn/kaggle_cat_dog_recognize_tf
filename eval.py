@@ -23,7 +23,7 @@ error = model.get_error(y, y_)
 merged_summary_op = model.get_summary_op(x, None, error)
 
 logs_path = "../eval_logs"
-summary_writer = tf.train.SummaryWriter(logs_path, graph=tf.get_default_graph())
+summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 
 sess.run(tf.global_variables_initializer())
 

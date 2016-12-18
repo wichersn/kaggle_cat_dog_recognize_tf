@@ -5,7 +5,7 @@ import time
 
 filenames, labels = input.get_filenames_labels(12500, .95, True, "../train")
 
-x, y_ = input.input_pipeline(filenames, labels, 50)
+x, y_ = input.input_pipeline(filenames, labels, 70)
 
 
 sess = tf.Session()
@@ -13,7 +13,9 @@ sess = tf.Session()
 coord = tf.train.Coordinator()
 threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-y = model.model(x, True)
+with tf.variable_scope("model") as scope:
+    y = model.model(x, True)
+
 loss = model.get_loss(y, y_)
 error = model.get_error(y, y_)
 optimizer =model.get_optimizer(loss)
@@ -29,7 +31,7 @@ except tf.errors.NotFoundError:
     print("No previous model")
 
 logs_path = "../logs"
-summary_writer = tf.train.SummaryWriter(logs_path, graph=tf.get_default_graph())
+summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 
 i = 0
 last_summary_time = 0
