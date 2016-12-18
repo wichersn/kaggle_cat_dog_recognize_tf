@@ -21,7 +21,7 @@ def model(x, isTrain):
                                                           weights_initializer=tf.contrib.layers.xavier_initializer()
                                                           )
         if isTrain:
-            fully_connect = tf.nn.dropout(fully_connect, .7)
+            fully_connect = tf.nn.dropout(fully_connect, .5)
 
     with tf.variable_scope("output"):
         y = tf.contrib.layers.fully_connected(fully_connect, 2,
@@ -58,7 +58,7 @@ def inseption_module(x, isTrain, five_conv_size, three_conv_size, ave_pool_size,
 
     result = tf.nn.max_pool(combined_conv, [1, max_pool_size, max_pool_size, 1], [1, 2, 2, 1], 'VALID')
     if isTrain:
-        result = tf.nn.dropout(result, .7)
+        result = tf.nn.dropout(result, .5)
     return tf.nn.lrn(result, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 def get_loss(y, y_):
