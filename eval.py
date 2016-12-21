@@ -32,7 +32,7 @@ while True:
     print("start calc")
     saver = tf.train.Saver()
     try:
-        saver.restore(sess, "../logs/model.ckpt-17")
+        saver.restore(sess, "../logs/model.ckpt-1123")
     except:
         pass
     else:

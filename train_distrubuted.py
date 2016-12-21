@@ -38,7 +38,7 @@ def main(_):
 
             with tf.variable_scope("input"):
                 filenames, labels = input.get_filenames_labels(12500, .95, True, "../train")
-                x, y_ = input.input_pipeline(filenames, labels, 70)
+                x, y_ = input.input_pipeline(filenames, labels, 500)
 
                 coord = tf.train.Coordinator()
 
@@ -65,7 +65,7 @@ def main(_):
                                  summary_op=summary_op,
                                  saver=saver,
                                  global_step=global_step,
-                                 save_model_secs=10)
+                                 save_model_secs=60)
 
         print("superviser created")
 
