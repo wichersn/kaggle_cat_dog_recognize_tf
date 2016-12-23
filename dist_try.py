@@ -35,14 +35,14 @@ def main(_):
                 worker_device="/job:worker/task:%d" % FLAGS.task_index,
                 cluster=cluster)):
 
-            batch_size = 1000000
+            batch_size = 10000000
             x = tf.ones([batch_size, 1], dtype=tf.float32)
             y = tf.ones([batch_size, 1], dtype=tf.float32)
             w = tf.Variable(tf.zeros([1, 1], dtype=tf.float32))
             loss = tf.reduce_mean(y - tf.matmul(x, w))
 
             global_step = tf.Variable(0)
-            train_op = tf.train.GradientDescentOptimizer(.000001).minimize(loss, global_step=global_step)
+            train_op = tf.train.GradientDescentOptimizer(.00001).minimize(loss, global_step=global_step)
 
             tf.summary.scalar("loss", loss)
 
@@ -71,7 +71,7 @@ def main(_):
                 # perform *synchronous* training.
                 _, step = sess.run([train_op, global_step])
 
-                if time.time() >= last_print_time + 1:
+                if time.time() >= last_print_time + 10:
                     print(sess.run(loss), step)
                     last_print_time = time.time()
 
