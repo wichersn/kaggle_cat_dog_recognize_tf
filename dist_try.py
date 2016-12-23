@@ -35,7 +35,7 @@ def main(_):
                 worker_device="/job:worker/task:%d" % FLAGS.task_index,
                 cluster=cluster)):
 
-            batch_size = 100
+            batch_size = 1000000
             x = tf.ones([batch_size, 1], dtype=tf.float32)
             y = tf.ones([batch_size, 1], dtype=tf.float32)
             w = tf.Variable(tf.zeros([1, 1], dtype=tf.float32))
@@ -71,8 +71,8 @@ def main(_):
                 # perform *synchronous* training.
                 _, step = sess.run([train_op, global_step])
 
-                if time.time() >= last_print_time + 30:
-                    print(sess.run(loss))
+                if time.time() >= last_print_time + 1:
+                    print(sess.run(loss), step)
                     last_print_time = time.time()
 
         print("exit")
