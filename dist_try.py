@@ -35,9 +35,11 @@ def main(_):
                 worker_device="/job:worker/task:%d" % FLAGS.task_index,
                 cluster=cluster)):
 
-            x = tf.constant(1, dtype=tf.float32)
-            y = tf.Variable(0, dtype=tf.float32)
-            loss = x - y
+            batch_size = 100
+            x = tf.ones([batch_size, 1], dtype=tf.float32)
+            y = tf.ones([batch_size, 1], dtype=tf.float32)
+            w = tf.Variable(tf.zeros([1, 1], dtype=tf.float32))
+            loss = tf.reduce_mean(y - tf.matmul(x, w))
 
             global_step = tf.Variable(0)
             train_op = tf.train.GradientDescentOptimizer(.000001).minimize(loss, global_step=global_step)
