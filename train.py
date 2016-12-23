@@ -19,16 +19,16 @@ with tf.variable_scope("optimizer"):
     loss = model.get_loss(y, y_)
     optimizer =model.get_optimizer(loss)
 
-error = model.get_error(y, y_)
+with tf.variable_scope("error"):
+    error = model.get_error(y, y_)
 
 sess.run(tf.global_variables_initializer())
 
-with tf.variable_scope("saver"):
-    saver = tf.train.Saver()
-    try:
-        saver.restore(sess, "../saved_models/model.ckpt")
-    except tf.errors.NotFoundError:
-        print("No previous model")
+saver = tf.train.Saver()
+try:
+    saver.restore(sess, "../saved_models/model.ckpt")
+except tf.errors.NotFoundError:
+    print("No previous model")
 
 with tf.variable_scope("summary"):
     logs_path = "../logs"

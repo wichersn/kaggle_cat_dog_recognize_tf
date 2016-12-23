@@ -38,7 +38,7 @@ def main(_):
 
             with tf.variable_scope("input"):
                 filenames, labels = input.get_filenames_labels(12500, .95, True, "../train")
-                x, y_ = input.input_pipeline(filenames, labels, 500)
+                x, y_ = input.input_pipeline(filenames, labels, 70)
 
                 coord = tf.train.Coordinator()
 

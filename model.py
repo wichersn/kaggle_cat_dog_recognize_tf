@@ -1,14 +1,26 @@
 import tensorflow as tf
 
+def get_total_size(t):
+    shape = t.get_shape().as_list()
+    return shape[1] * shape[2] * shape[3]
+
 def model(x, isTrain):
+    print(get_total_size(x))
 
     with tf.variable_scope("inception1"):
-        conv1 = inseption_module(x, isTrain, five_conv_size=8, three_conv_size=5, ave_pool_size=4, one_one_ave_size=3, max_pool_size=4)
+        conv1 = inseption_module(x, isTrain, five_conv_size=5, three_conv_size=3, ave_pool_size=4, one_one_ave_size=2, max_pool_size=4)
     print(conv1)
+    print(get_total_size(conv1))
 
     with tf.variable_scope("inception2"):
-        last_conv = inseption_module(conv1, isTrain, 11, 8, 4, 6, 3)
+        conv2 = inseption_module(conv1, isTrain, five_conv_size=10, three_conv_size=6, ave_pool_size=3, one_one_ave_size=4, max_pool_size=3)
+    print(conv2)
+    print(get_total_size(conv2))
+
+    with tf.variable_scope("inception3"):
+        last_conv = inseption_module(conv2, isTrain, five_conv_size=15, three_conv_size=10, ave_pool_size=2, one_one_ave_size=7, max_pool_size=3)
     print(last_conv)
+    print(get_total_size(last_conv))
 
     shape = last_conv.get_shape().as_list()
     reshaped_last_conv = tf.reshape(last_conv, [-1, shape[1] * shape[2] * shape[3]])
