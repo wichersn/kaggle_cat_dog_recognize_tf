@@ -35,24 +35,26 @@ def main(_):
                 worker_device="/job:worker/task:%d" % FLAGS.task_index,
                 cluster=cluster)):
 
-            batch_size = 10000000
-            x = tf.ones([batch_size, 1], dtype=tf.float32)
-            y = tf.ones([batch_size, 1], dtype=tf.float32)
+            batch_size = 100000
+            x = tf.placeholder(tf.float32, shape=(batch_size, 1))
+            y_ = tf.placeholder(tf.float32, shape=(batch_size, 1))
             w = tf.Variable(tf.zeros([1, 1], dtype=tf.float32))
-            loss = tf.reduce_mean(y - tf.matmul(x, w))
+            loss = tf.reduce_mean(y_ - tf.matmul(x, w))
 
             global_step = tf.Variable(0)
             train_op = tf.train.GradientDescentOptimizer(.00001).minimize(loss, global_step=global_step)
 
-            tf.summary.scalar("loss", loss)
-
+        feed_val = [[1.0] for i in range(batch_size)]
+        feed_dict = {x: feed_val, y_: feed_val}
+        print(feed_dict)
 
         # Create a "supervisor", which oversees the training process.
         sv = tf.train.Supervisor(is_chief=(FLAGS.task_index == 0),
                                  logdir="../logs",
                                  init_op=tf.global_variables_initializer(),
-                                 summary_op=tf.summary.merge_all(),
+                                 init_feed_dict=feed_dict,
                                  global_step=global_step,
+                                 summary_op = None,
                                  save_model_secs=60)
 
         print("superviser created")
@@ -69,11 +71,12 @@ def main(_):
                 # Run a training step asynchronously.
                 # See `tf.train.SyncReplicasOptimizer` for additional details on how to
                 # perform *synchronous* training.
-                _, step = sess.run([train_op, global_step])
+                _, step = sess.run([train_op, global_step], feed_dict=feed_dict)
 
                 if time.time() >= last_print_time + 10:
-                    print(sess.run(loss), step)
+                    print(sess.run(loss, feed_dict=feed_dict), step)
                     last_print_time = time.time()
+                #time.sleep(.01)
 
         print("exit")
         # Ask for all the services to stop.
