@@ -39,7 +39,7 @@ def main(_):
 
             with tf.variable_scope("input"):
                 filenames, labels = input.get_filenames_labels(12500, .95, True, "../train")
-                x, y_ = input.input_pipeline(filenames, labels, 70)
+                x, y_ = input.input_pipeline(filenames, labels, 140)
 
                 coord = tf.train.Coordinator()
 
@@ -53,7 +53,9 @@ def main(_):
 
             saver = tf.train.Saver(var_list=tf.get_collection(tf.GraphKeys.MODEL_VARIABLES))
 
-            summary_op = tf.summary.merge_all()
+            with tf.variable_scope("summary"):
+                error = model.get_error(y, y_)
+                summary_op = model.get_summary_op(x, loss, error)
             init_op = tf.global_variables_initializer()
 
             non_model_vars = set(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)) - set(tf.get_collection(tf.GraphKeys.MODEL_VARIABLES))
@@ -68,6 +70,7 @@ def main(_):
                                  summary_op=summary_op,
                                  saver=saver,
                                  global_step=global_step,
+                                 save_summaries_secs= 30,
                                  save_model_secs=30)
 
         print("superviser created")
