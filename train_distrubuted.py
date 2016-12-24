@@ -56,13 +56,15 @@ def main(_):
             summary_op = tf.summary.merge_all()
             init_op = tf.global_variables_initializer()
 
+            non_model_vars = set(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)) - set(tf.get_collection(tf.GraphKeys.MODEL_VARIABLES))
+
         print("model setup")
 
         # Create a "supervisor", which oversees the training process.
         sv = tf.train.Supervisor(is_chief=(FLAGS.task_index == 0),
                                  logdir="../logs",
                                  init_op=init_op,
-                                 local_init_op =init_op,
+                                 local_init_op =tf.variables_initializer(non_model_vars),
                                  summary_op=summary_op,
                                  saver=saver,
                                  global_step=global_step,
