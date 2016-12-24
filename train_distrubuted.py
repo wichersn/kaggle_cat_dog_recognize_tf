@@ -1,6 +1,7 @@
 import tensorflow as tf
 import model
 import input
+import time
 
 # Flags for defining the tf.train.ClusterSpec
 tf.app.flags.DEFINE_string("ps_hosts", "",
@@ -15,8 +16,6 @@ tf.app.flags.DEFINE_integer("task_index", 0, "Index of task within the job")
 FLAGS = tf.app.flags.FLAGS
 
 def main(_):
-    tf.set_random_seed(57456)
-
     ps_hosts = FLAGS.ps_hosts.split(",")
     worker_hosts = FLAGS.worker_hosts.split(",")
 
@@ -52,8 +51,7 @@ def main(_):
                 loss = model.get_loss(y, y_)
                 train_op = tf.train.AdamOptimizer().minimize(loss, global_step=global_step)
 
-            with tf.variable_scope("saver"):
-                saver = tf.train.Saver()
+            saver = tf.train.Saver(var_list=tf.get_collection(tf.GraphKeys.MODEL_VARIABLES))
 
             summary_op = tf.summary.merge_all()
             init_op = tf.global_variables_initializer()
@@ -64,6 +62,7 @@ def main(_):
         sv = tf.train.Supervisor(is_chief=(FLAGS.task_index == 0),
                                  logdir="../logs",
                                  init_op=init_op,
+                                 local_init_op =init_op,
                                  summary_op=summary_op,
                                  saver=saver,
                                  global_step=global_step,
@@ -79,14 +78,12 @@ def main(_):
             # Loop until the supervisor shuts down or 1000000 steps have completed.
             tf.train.start_queue_runners(coord=coord, sess=sess)
             step = 0
+            start_time = time.time()
             while not sv.should_stop() and step < 1000000:
                 # Run a training step asynchronously.
                 # See `tf.train.SyncReplicasOptimizer` for additional details on how to
                 # perform *synchronous* training.
                 _, step = sess.run([train_op, global_step])
-
-                #if step % 10 ==0:
-                #    print(sess.run(loss))
 
         print("exit")
         # Ask for all the services to stop.

@@ -25,8 +25,9 @@ with tf.variable_scope("error"):
 sess.run(tf.global_variables_initializer())
 
 saver = tf.train.Saver()
+model_path = "../logs/model.ckpt"
 try:
-    saver.restore(sess, "../saved_models/model.ckpt")
+    saver.restore(sess, model_path)
 except tf.errors.NotFoundError:
     print("No previous model")
 
@@ -51,9 +52,9 @@ try:
             last_summary_time = time.time()
             print("summary", i)
 
-        if time.time() >= last_save_time + 60:
+        if time.time() >= last_save_time + 30:
         #if i % 250 == 0:
-            save_path = saver.save(sess, "../saved_models/model.ckpt")
+            save_path = saver.save(sess, model_path)
             last_save_time = time.time()
             print("saved", i)
 
