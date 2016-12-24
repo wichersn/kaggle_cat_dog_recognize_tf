@@ -15,6 +15,8 @@ tf.app.flags.DEFINE_integer("task_index", 0, "Index of task within the job")
 FLAGS = tf.app.flags.FLAGS
 
 def main(_):
+    tf.set_random_seed(57456)
+
     ps_hosts = FLAGS.ps_hosts.split(",")
     worker_hosts = FLAGS.worker_hosts.split(",")
 
@@ -65,7 +67,7 @@ def main(_):
                                  summary_op=summary_op,
                                  saver=saver,
                                  global_step=global_step,
-                                 save_model_secs=60)
+                                 save_model_secs=30)
 
         print("superviser created")
 
@@ -82,6 +84,9 @@ def main(_):
                 # See `tf.train.SyncReplicasOptimizer` for additional details on how to
                 # perform *synchronous* training.
                 _, step = sess.run([train_op, global_step])
+
+                #if step % 10 ==0:
+                #    print(sess.run(loss))
 
         print("exit")
         # Ask for all the services to stop.

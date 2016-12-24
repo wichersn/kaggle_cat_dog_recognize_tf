@@ -46,7 +46,6 @@ def main(_):
 
         feed_val = [[1.0] for i in range(batch_size)]
         feed_dict = {x: feed_val, y_: feed_val}
-        print(feed_dict)
 
         # Create a "supervisor", which oversees the training process.
         sv = tf.train.Supervisor(is_chief=(FLAGS.task_index == 0),

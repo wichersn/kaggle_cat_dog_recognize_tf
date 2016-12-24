@@ -23,6 +23,7 @@ error = model.get_error(y, y_)
 merged_summary_op = model.get_summary_op(x, None, error)
 
 logs_path = "../eval_logs"
+model_dir = "../logs/"
 summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 
 sess.run(tf.global_variables_initializer())
@@ -32,9 +33,10 @@ while True:
     print("start calc")
     saver = tf.train.Saver()
     try:
-        saver.restore(sess, "../saved_models/model.ckpt")
+        checkpoint_state = tf.train.get_checkpoint_state(model_dir)
+        saver.restore(sess, checkpoint_state.model_checkpoint_path)
     except:
-        pass
+        print("No model found")
     else:
 
         num_iters = int(len(filenames) / batch_size)
@@ -58,7 +60,7 @@ while True:
 
     run_num += 1
 
-    time.sleep(60)
+    time.sleep(30)
 
 coord.request_stop()
 
