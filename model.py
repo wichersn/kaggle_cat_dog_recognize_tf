@@ -4,7 +4,7 @@ def get_total_size(t):
     shape = t.get_shape().as_list()
     return shape[1] * shape[2] * shape[3]
 
-def model(x, isTrain, train_keep_prob=.5):
+def model(x, isTrain, train_keep_prob=.75):
     print(get_total_size(x))
 
     with tf.variable_scope("inception1"):

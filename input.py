@@ -48,11 +48,11 @@ def input_pipeline(filenames, labels, batch_size, isTrain=True):
         example_batch, label_batch = tf.train.batch(
             [example, label], batch_size=batch_size, capacity=capacity)
         example_batch = tf.cast(example_batch, tf.float32)
-    #example_batch = tf.image.resize_images(example_batch, [32, 32])
     return example_batch, label_batch
 
 def transform_example(example, isTrain):
-    example = tf.image.resize_images(example, [50, 50])  # tf.reshape(example, [100, 100, 3])
+    #example = tf.image.resize_images(example, [50, 50])  # tf.reshape(example, [100, 100, 3])
+    example = tf.reshape(example, [50, 50, 3])
     if isTrain:
         example = tf.image.random_flip_left_right(example)
         example = tf.image.random_brightness(example, .7)

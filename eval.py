@@ -3,7 +3,7 @@ import input
 import model
 import time
 
-filenames, labels = input.get_filenames_labels(12500, .95, False, "../train")
+filenames, labels = input.get_filenames_labels(12500, .95, False, "../train_preprocessed2")
 
 print("num_examples", len(filenames))
 
@@ -60,7 +60,7 @@ while True:
 
     run_num += 1
 
-    time.sleep(30)
+    time.sleep(600)
 
 coord.request_stop()
 

@@ -38,13 +38,13 @@ def main(_):
                 cluster=cluster)):
 
             with tf.variable_scope("input"):
-                filenames, labels = input.get_filenames_labels(12500, .95, True, "../train")
-                x, y_ = input.input_pipeline(filenames, labels, 140)
+                filenames, labels = input.get_filenames_labels(12500, .95, True, "../train_preprocessed2")
+                x, y_ = input.input_pipeline(filenames, labels, 200)
 
                 coord = tf.train.Coordinator()
 
             with tf.variable_scope("model"):
-                y = model.model(x, True)
+                y = model.model(x, True, .75)
 
             with tf.variable_scope("optimizer"):
                 global_step = tf.Variable(0)
@@ -71,7 +71,7 @@ def main(_):
                                  saver=saver,
                                  global_step=global_step,
                                  save_summaries_secs= 30,
-                                 save_model_secs=30)
+                                 save_model_secs=600)
 
         print("superviser created")
 
