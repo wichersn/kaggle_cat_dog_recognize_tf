@@ -8,17 +8,17 @@ def model(x, isTrain, train_keep_prob=.75):
     print(get_total_size(x))
 
     with tf.variable_scope("inception1"):
-        conv1 = inseption_module(x, isTrain, five_conv_size=5, three_conv_size=3, ave_pool_size=4, one_one_ave_size=2, max_pool_size=4, train_keep_prob=train_keep_prob)
+        conv1 = inseption_module(x, isTrain, five_conv_size=6, three_conv_size=3, ave_pool_size=4, one_one_ave_size=2, max_pool_size=4, train_keep_prob=train_keep_prob)
     print(conv1)
     print(get_total_size(conv1))
 
     with tf.variable_scope("inception2"):
-        conv2 = inseption_module(conv1, isTrain, five_conv_size=10, three_conv_size=6, ave_pool_size=3, one_one_ave_size=4, max_pool_size=3, train_keep_prob=train_keep_prob)
+        conv2 = inseption_module(conv1, isTrain, five_conv_size=15, three_conv_size=10, ave_pool_size=3, one_one_ave_size=7, max_pool_size=3, train_keep_prob=train_keep_prob)
     print(conv2)
     print(get_total_size(conv2))
 
     with tf.variable_scope("inception3"):
-        last_conv = inseption_module(conv2, isTrain, five_conv_size=15, three_conv_size=10, ave_pool_size=2, one_one_ave_size=7, max_pool_size=3, train_keep_prob=train_keep_prob)
+        last_conv = inseption_module(conv2, isTrain, five_conv_size=25, three_conv_size=17, ave_pool_size=2, one_one_ave_size=15, max_pool_size=3, train_keep_prob=train_keep_prob)
     print(last_conv)
     print(get_total_size(last_conv))
 
@@ -28,7 +28,7 @@ def model(x, isTrain, train_keep_prob=.75):
     print(reshaped_last_conv)
 
     with tf.variable_scope("fully_connect"):
-        fully_connect = tf.contrib.layers.fully_connected(reshaped_last_conv, 100,
+        fully_connect = tf.contrib.layers.fully_connected(reshaped_last_conv, 500,
                                                           biases_initializer=tf.constant_initializer(0.0),
                                                           weights_initializer=tf.contrib.layers.xavier_initializer()
                                                           )

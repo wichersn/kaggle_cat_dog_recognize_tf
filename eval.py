@@ -3,7 +3,7 @@ import input
 import model
 import time
 
-filenames, labels = input.get_filenames_labels(12500, .95, False, "../train_preprocessed2")
+filenames, labels = input.get_filenames_labels(12500, .90, False, "../train_preprocessed2")
 
 print("num_examples", len(filenames))
 

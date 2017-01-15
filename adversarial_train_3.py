@@ -3,7 +3,7 @@ import input
 import model
 import time
 
-filenames, labels = input.get_filenames_labels(12500, .95, True, "../train_preprocessed2")
+filenames, labels = input.get_filenames_labels(12500, .90, True, "../train_preprocessed2")
 
 batch_size = 70
 images, y_ = input.input_pipeline(filenames, labels, batch_size)

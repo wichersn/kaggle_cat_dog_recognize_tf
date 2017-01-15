@@ -38,7 +38,7 @@ def main(_):
                 cluster=cluster)):
 
             with tf.variable_scope("input"):
-                filenames, labels = input.get_filenames_labels(12500, .95, True, "../train_preprocessed2")
+                filenames, labels = input.get_filenames_labels(12500, .90, True, "../train_preprocessed2")
                 x, y_ = input.input_pipeline(filenames, labels, 200)
 
                 coord = tf.train.Coordinator()
